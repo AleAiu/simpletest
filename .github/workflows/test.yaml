@@ -1,0 +1,42 @@
+name: test WSL
+
+on:
+  workflow_dispatch
+
+jobs:
+  wsl_run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - shell: pwsh
+        run: |
+          Write-Host "wsl --status"
+          wsl --status
+
+          Write-Host "wsl --list --online"
+          wsl --list --online
+
+          write-host "WSL install of ubuntu."
+          Write-Host "wsl --install -d Ubuntu-20.04"
+          wsl --install -d Ubuntu-20.04
+
+          Write-Host "wsl --list --all --verbose | out-string"
+          $wsl = wsl --list --all --verbose | out-string
+          write-host $wsl
+
+          $checkCount = 0
+          while ($wsl -notmatch 'Ubuntu-20.04.*running') {
+            $checkCount++
+            if ($checkCount -gt 30) {
+              Write-Host "Failed to detect start in time"
+              exit 1
+            }
+            start-sleep -seconds 1
+            Write-Host "wsl --list --all --verbose | out-string"
+            $wsl = wsl --list --all --verbose | out-string
+            write-host $wsl
+
+            Write-Host "wsl --status"
+            wsl --status
+          }
+          write-host "Ubuntu installed."
